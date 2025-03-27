@@ -165,7 +165,8 @@ Distributed under the MIT License.
 
 Satyam Gupta - shsatyam7417@gmail.com
 
-Project Link: [[https://github.com/yourusername/AI_IMAGE_GENERATO](https://github.com/Sgupta-Code/AI_IMAGE_GENERATOR.git)
+Project Link: https://github.com/Sgupta-Code/AI_IMAGE_GENERATOR.git
+
 ## 🙏 Acknowledgements
 
 - Hugging Face
