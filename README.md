@@ -46,8 +46,7 @@ AI_IMAGE_GENERATOR is a full-stack web application that transforms text prompts 
 
 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/AI_IMAGE_GENERATOR.git
-cd AI_IMAGE_GENERATOR
+git clone https://github.com/Sgupta-Code/AI_IMAGE_GENERATOR.git
 ```
 
 2. Install Dependencies
@@ -166,8 +165,7 @@ Distributed under the MIT License.
 
 Satyam Gupta - shsatyam7417@gmail.com
 
-Project Link: [https://github.com/yourusername/AI_IMAGE_GENERATOR](https://github.com/yourusername/AI_IMAGE_GENERATOR)
-
+Project Link: [[https://github.com/yourusername/AI_IMAGE_GENERATO](https://github.com/Sgupta-Code/AI_IMAGE_GENERATOR.git)
 ## 🙏 Acknowledgements
 
 - Hugging Face
