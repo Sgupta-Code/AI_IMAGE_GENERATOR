@@ -46,7 +46,7 @@ AI_IMAGE_GENERATOR is a full-stack web application that transforms text prompts 
 
 1. Clone the Repository
 ```bash
-git clone https://github.com/[YOUR_USERNAME]/AI_IMAGE_GENERATOR.git
+git clone https://github.com/yourusername/AI_IMAGE_GENERATOR.git
 cd AI_IMAGE_GENERATOR
 ```
 
@@ -164,9 +164,9 @@ Distributed under the MIT License.
 
 ## 📞 Contact
 
-Your Name - your.email@example.com
+Satyam Gupta - shsatyam7417@gmail.com
 
-Project Link: [https://github.com/[YOUR_USERNAME]/AI_IMAGE_GENERATOR](https://github.com/[YOUR_USERNAME]/AI_IMAGE_GENERATOR)
+Project Link: [https://github.com/yourusername/AI_IMAGE_GENERATOR](https://github.com/yourusername/AI_IMAGE_GENERATOR)
 
 ## 🙏 Acknowledgements
 
@@ -175,12 +175,3 @@ Project Link: [https://github.com/[YOUR_USERNAME]/AI_IMAGE_GENERATOR](https://gi
 - Node.js
 - MongoDB
 - Material-UI
-```
-
-Would you like me to make any specific modifications to the README? The current version follows the style you suggested, with a focus on a clean, informative layout that highlights the key aspects of the AI Image Generator project.
-
-Key areas you might want to personalize:
-1. Replace `[YOUR_USERNAME]` with your actual GitHub username
-2. Update contact information
-3. Add any specific project-unique instructions or considerations
-4. Include any screenshots or additional documentation if needed
