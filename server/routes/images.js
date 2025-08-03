@@ -1,103 +1,131 @@
 // routes/images.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const axios = require('axios');
-const auth = require('../middleware/auth');
-const Image = require('../models/Image');
+const axios = require("axios");
+const auth = require("../middleware/auth");
+const Image = require("../models/Image");
+
 
 // Generate image
-router.post('/generate', auth, async (req, res) => {
-  try {
+router.post("/generate",auth,async(req,res) => {
+  try{
     const { prompt } = req.body;
-    
     if (!prompt) {
-      return res.status(400).json({ msg: 'Prompt is required' });
+      return res.status(400).json({ msg: "Prompt is required" });
     }
-    
-    // Call to Hugging Face Inference API for Stable Diffusion
-    const response = await axios({
-      method: 'post',
-      url: 'https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5',
-      headers: {
-        'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-        'Content-Type': 'application/json'
+
+    // call freepik API to generate image
+    const freepikResponse = await axios.post(
+      "https://api.freepik.com/v1/ai/mystic",
+      {
+        prompt,
+        hdr: 50,
+        resolution: "2k",
+        aspect_ratio: "square_1_1",
+        model: "realism",
+        creative_detailing: 33,
+        engine: "automatic",
+        filter_nsfw: true,
       },
-      data: {
-        inputs: prompt,
-        parameters: {
-          num_inference_steps: 50,
-          guidance_scale: 7.5
-        }
-      },
-      responseType: 'arraybuffer'
-    });
-    
-    // Convert binary response to base64 for storing/displaying
-    const base64Image = Buffer.from(response.data).toString('base64');
-    const imageUrl = `data:image/jpeg;base64,${base64Image}`;
-    
-    // Save the generated image to the database
+      {
+        headers: {
+          "x-freepik-api-key": process.env.FREEPIK_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const {task_id, status} = freepikResponse.data.data;
+
+    // Save to DB
     const newImage = new Image({
       userId: req.user.id,
       prompt,
-      imageUrl
+      taskId: task_id,
+      status,
+      imageUrl: "" // Initially empty, will be updated later
     });
-    
     await newImage.save();
-    
-    res.json(newImage);
+
+    res.json({
+      msg: "Image generation started. Use /api/images/status/:taskId to check status.",
+      image: newImage
+    });
   } catch (err) {
-    console.error('Error generating image:', err);
-    
-    // Check for specific Hugging Face API errors
-    if (err.response) {
-      if (err.response.status === 503) {
-        return res.status(503).json({ 
-          msg: 'The model is currently loading. Please try again in a moment.' 
-        });
-      } else if (err.response.status === 429) {
-        return res.status(429).json({ 
-          msg: 'Rate limit exceeded. Please try again later.' 
-        });
-      }
+    console.error("Error generating image:", err);
+    let errorMessage = "Server error";
+    if (err.response && err.response.data) {
+      errorMessage = err.response.data.error || err.response.data.message || errorMessage;
     }
-    
-    res.status(500).json({ msg: 'Server error', error: err.message });
+    res.status(500).json({ msg: errorMessage });
   }
 });
 
 // Get all images for current user
-router.get('/', auth, async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
-    const images = await Image.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const images = await Image.find({ userId: req.user.id }).sort({
+      createdAt: -1,
+    });
     res.json(images);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send("Server error");
   }
 });
 
 // Delete an image
-router.delete('/:id', auth, async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     const image = await Image.findById(req.params.id);
-    
+
     // Check if image exists
     if (!image) {
-      return res.status(404).json({ msg: 'Image not found' });
+      return res.status(404).json({ msg: "Image not found" });
     }
-    
+
     // Check if user owns the image
     if (image.userId.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'Not authorized' });
+      return res.status(401).json({ msg: "Not authorized" });
     }
-    
-    await image.remove();
-    
-    res.json({ msg: 'Image removed' });
+
+    // Use deleteOne instead of remove (which is deprecated)
+    await Image.deleteOne({ _id: req.params.id });
+
+    res.json({ msg: "Image removed" });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send("Server error");
+  }
+});
+
+router.get("/status/:taskId", auth, async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const statusResponse = await axios.get(
+      `https://api.freepik.com/v1/ai/mystic/${taskId}`,
+      {
+        headers: {
+          "x-freepik-api-key": process.env.FREEPIK_API_KEY,
+        },
+      }
+    );
+    // console.log('Freepik status response:', statusResponse.data.data);
+    const { status, generated } = statusResponse.data.data;
+
+    if (generated && generated.length > 0) {
+      const imageUrl = generated[0];
+      // Update DB
+      await Image.findOneAndUpdate(
+        { taskId },
+        { imageUrl, status: "COMPLETED" }
+      );
+      return res.json({ status: "COMPLETED", imageUrl });
+    }
+    res.json({ status });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Failed to fetch status" });
   }
 });
 

@@ -13,8 +13,16 @@ const ImageSchema = new mongoose.Schema({
   },
   imageUrl: {
     type: String,
+  },
+  taskId:{
+    type: String,
     required: true
   },
+  status:{
+    type: String,
+    default: 'CREATED'
+  },
+  
   createdAt: {
     type: Date,
     default: Date.now
